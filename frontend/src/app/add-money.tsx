@@ -130,7 +130,7 @@ export default function AddMoneyScreen() {
           <Text style={styles.backText}>‹ Back</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Add Money</Text>
-        <View style={{ width: 50 }} /> {/* Empty view for centering */}
+        <View style={{ width: 50 }} />
       </View>
 
       <View style={styles.container}>
@@ -171,7 +171,7 @@ export default function AddMoneyScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Our Custom Success Modal Dialog */}
+
       <Modal
         visible={showSuccessModal}
         transparent={true}

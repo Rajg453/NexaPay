@@ -5,7 +5,7 @@ import connectDB from './config/db';
 import cors from 'cors';
 // dotenv: Helps us read secret variables (like our AI token) from the .env file securely
 import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' }); // Make sure we load the .env from the root of backend folder
+dotenv.config(); // Make sure we load the .env from the root of backend folder
 
 // Import our API routes
 import aiRoutes from './routes/aiRoutes';
@@ -17,7 +17,7 @@ import billRoutes from './routes/billRoutes';
 import bankRoutes from './routes/bankRoutes';
 
 const app: Express = express();
-const PORT = 3000; // We'll use port 3000 for our backend
+const PORT = process.env.PORT || 3000; // Use port from .env or default to 3000
 
 // Connect to MongoDB
 connectDB();

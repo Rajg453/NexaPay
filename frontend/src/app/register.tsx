@@ -70,8 +70,6 @@ export default function RegisterScreen() {
             <Text style={styles.inputLabel}>Full Name</Text>
             <TextInput 
               style={styles.input} 
-              placeholder="John Doe"
-              placeholderTextColor="#999"
               value={name}
               onChangeText={setName} 
             />
@@ -79,8 +77,6 @@ export default function RegisterScreen() {
             <Text style={styles.inputLabel}>Email Address</Text>
             <TextInput 
               style={styles.input} 
-              placeholder="you@example.com"
-              placeholderTextColor="#999"
               value={email}
               onChangeText={setEmail} 
               autoCapitalize="none"
@@ -90,8 +86,6 @@ export default function RegisterScreen() {
             <Text style={styles.inputLabel}>Password</Text>
             <TextInput 
               style={styles.input} 
-              placeholder="••••••••" 
-              placeholderTextColor="#999"
               value={password}
               onChangeText={setPassword} 
               secureTextEntry // Hides the password dots

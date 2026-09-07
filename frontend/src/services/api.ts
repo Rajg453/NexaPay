@@ -4,8 +4,8 @@ import { Platform } from 'react-native';
 // Since we are running on a mobile device, 'localhost' points to the phone itself.
 // But on web, localhost points to the computer running the backend.
 const BASE_URL = Platform.OS === 'web'
-  ? 'http://localhost:3000/api'
-  : 'http://10.175.222.213:3000/api';
+  ? 'http://localhost:5000/api'
+  : 'http://10.175.222.213:5000/api';
 
 export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
   // Use AsyncStorage instead of localStorage for mobile
