@@ -34,7 +34,7 @@ export const Login = () => {
   return (
     <div className="glass-card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '400px', margin: '0 auto', width: '100%' }}>
       <h2 style={{ color: 'var(--text-main)', fontSize: '24px', textAlign: 'center' }}>Welcome Back</h2>
-      <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>Sign in to continue to Paystream</p>
+      <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>Sign in to continue to NexaPay</p>
       
       {error && <div style={{ color: 'var(--error)', backgroundColor: '#fce8e6', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>{error}</div>}
       

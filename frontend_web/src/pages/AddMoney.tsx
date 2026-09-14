@@ -25,7 +25,7 @@ export const AddMoney = () => {
         key: 'rzp_test_YOUR_KEY_ID', // In production, this should be fetched from backend or env
         amount: order.amount,
         currency: order.currency,
-        name: 'Paystream',
+        name: 'NexaPay',
         description: 'Add Money to Wallet',
         order_id: order.id,
         handler: async function (response: any) {
@@ -69,7 +69,7 @@ export const AddMoney = () => {
   return (
     <div className="glass-card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <h2 style={{ color: 'var(--text-main)', fontSize: '24px' }}>Add Money to Wallet</h2>
-      <p style={{ color: 'var(--text-muted)' }}>Enter the amount you wish to add to your Paystream wallet.</p>
+      <p style={{ color: 'var(--text-muted)' }}>Enter the amount you wish to add to your NexaPay wallet.</p>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <input 

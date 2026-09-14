@@ -16,7 +16,7 @@ export const Footer = () => {
         <span style={{ cursor: 'pointer' }}>Privacy Policy</span>
         <span style={{ cursor: 'pointer' }}>Terms of Service</span>
       </div>
-      <p style={{ margin: 0 }}>© 2026 Paystream Technologies. Built with best practices.</p>
+      <p style={{ margin: 0 }}>© 2026 NexaPay Technologies. Built with best practices.</p>
     </footer>
   );
 };

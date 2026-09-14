@@ -36,7 +36,7 @@ export const Header = () => {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
         <h1 style={{ color: 'var(--primary)', margin: 0, fontSize: '22px', fontWeight: 'bold' }}>
-          Paystream
+          NexaPay
         </h1>
         
         <nav className="desktop-only" style={{ display: 'flex', gap: '20px' }}>

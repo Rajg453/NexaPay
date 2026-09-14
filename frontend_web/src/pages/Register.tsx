@@ -35,7 +35,7 @@ export const Register = () => {
   return (
     <div className="glass-card" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '400px', margin: '0 auto', width: '100%' }}>
       <h2 style={{ color: 'var(--text-main)', fontSize: '24px', textAlign: 'center' }}>Create Account</h2>
-      <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>Join Paystream today</p>
+      <p style={{ color: 'var(--text-muted)', textAlign: 'center' }}>Join NexaPay today</p>
       
       {error && <div style={{ color: 'var(--error)', backgroundColor: '#fce8e6', padding: '10px', borderRadius: '8px', textAlign: 'center' }}>{error}</div>}
       

@@ -242,7 +242,7 @@ export const Recharge = () => {
           >
             <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '16px', fontSize: '20px' }}>👛</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Paystream Wallet</div>
+              <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>NexaPay Wallet</div>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Balance: ₹{walletBalance}</div>
             </div>
             <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `2px solid ${paymentMethod === 'wallet' ? 'var(--primary)' : '#ccc'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

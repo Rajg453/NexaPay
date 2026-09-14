@@ -16,7 +16,7 @@ export const ScanAndPay = () => {
 
     const onScanSuccess = (decodedText: string, decodedResult: any) => {
       // decodedText should be the UPI ID or merchant ID
-      // E.g., 'merchant123@paystream'
+      // E.g., 'merchant123@NexaPay'
       scanner.clear();
       navigate(`/transfer/${encodeURIComponent(decodedText)}`);
     };

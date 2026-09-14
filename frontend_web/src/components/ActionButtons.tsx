@@ -33,7 +33,7 @@ export const ActionButtons = () => {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: order.currency,
-        name: 'Paystream',
+        name: 'NexaPay',
         description: 'Test Transfer',
         order_id: order.id,
         handler: async function (response: any) {
