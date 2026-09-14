@@ -1,13 +1,4 @@
 {
   "buildCommand": "npx expo export",
-  "outputDirectory": "dist",
-  "devCommand": "npm start",
-  "cleanUrls": true,
-  "framework": null,
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "outputDirectory": "dist"
 }
