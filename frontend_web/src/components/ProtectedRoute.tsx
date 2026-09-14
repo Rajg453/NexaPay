@@ -9,5 +9,14 @@ export const ProtectedRoute = () => {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
   }
 
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
+  if (!user) {
+    const hasAccount = localStorage.getItem('has_account');
+    if (hasAccount) {
+      return <Navigate to="/login" replace />;
+    } else {
+      return <Navigate to="/register" replace />;
+    }
+  }
+
+  return <Outlet />;
 };

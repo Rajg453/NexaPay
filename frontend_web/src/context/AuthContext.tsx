@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../services/api';
 
 type User = {
   _id: string;
@@ -45,13 +46,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(tokenStr);
     localStorage.setItem('token', tokenStr);
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('has_account', 'true'); // Flag to remember this is a returning user
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Tell backend to clear the httpOnly refresh token cookie
+      await apiFetch('/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error("Logout failed on server", e);
+    }
     setUser(null);
     setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // We intentionally DO NOT remove 'has_account' so they route to /login next time
   };
 
   return (

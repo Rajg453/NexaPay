@@ -3,6 +3,8 @@ import express, { Express } from 'express';
 import connectDB from './config/db';
 // cors: Allows our React frontend (running on a different port) to talk to this backend
 import cors from 'cors';
+// cookie-parser: Allows us to securely read HTTP-only cookies (like refresh tokens)
+import cookieParser from 'cookie-parser';
 // dotenv: Helps us read secret variables (like our AI token) from the .env file securely
 import dotenv from 'dotenv';
 dotenv.config(); // Make sure we load the .env from the root of backend folder
@@ -24,8 +26,9 @@ const PORT = process.env.PORT || 3000; // Use port from .env or default to 3000
 connectDB();
 
 // Middleware setup
-app.use(cors()); // Allows your React frontend to make requests to this backend
+app.use(cors({ origin: true, credentials: true })); // Allows your React frontend to make requests to this backend, and accept cookies
 app.use(express.json()); // Allows us to easily handle JSON data sent from the frontend
+app.use(cookieParser()); // Allows us to read cookies
 app.use('/api', aiRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/auth', authRoutes);
