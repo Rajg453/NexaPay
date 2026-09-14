@@ -9,7 +9,7 @@ export interface AuthRequest extends Request {
 }
 
 // This middleware protects our routes so only logged-in users can access them
-export const protect = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void> => {
+export const protect = async (req: AuthRequest, res: Response, next: NextFunction): Promise<void | Response> => {
   let token: string | undefined;
 
   // Check if the request has an authorization header with a Bearer token
