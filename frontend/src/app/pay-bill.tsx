@@ -38,6 +38,30 @@ export default function PayBill() {
   const [countryCode, setCountryCode] = useState('+91');
   const [showCountryModal, setShowCountryModal] = useState(false);
 
+  // Formatting Helpers
+  const handleCardNumberChange = (text: string) => {
+    // Strip all non-digits
+    const cleaned = text.replace(/\D/g, '');
+    // Insert space every 4 digits
+    const formatted = cleaned.replace(/(.{4})/g, '$1 ').trim();
+    setCardNumber(formatted);
+  };
+
+  const handleExpiryChange = (text: string) => {
+    // Strip non-digits
+    let cleaned = text.replace(/\D/g, '');
+    // Insert slash after 2 digits
+    if (cleaned.length >= 3) {
+      cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`;
+    }
+    setExpiry(cleaned);
+  };
+
+  const handleCvvChange = (text: string) => {
+    // Strip non-digits
+    setCvv(text.replace(/\D/g, ''));
+  };
+
   const handlePayment = async () => {
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -179,42 +203,48 @@ export default function PayBill() {
           </View>
 
           {paymentMethod === 'card' && (
-            <View style={styles.cardDetailsContainer}>
-              <Text style={styles.cardSectionTitle}>Card Details</Text>
-              
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Card Number</Text>
+            <View style={styles.physicalCardContainer}>
+              <View style={styles.physicalCardHeader}>
+                <View style={styles.chipIcon}></View>
+                <Text style={styles.cardBrand}>NexaCard</Text>
+              </View>
+
+              <View style={styles.physicalCardInputGroup}>
+                <Text style={styles.physicalCardLabel}>CARD NUMBER</Text>
                 <TextInput
-                  style={styles.textInput}
+                  style={styles.physicalCardTextInput}
                   placeholder="0000 0000 0000 0000"
+                  placeholderTextColor="#9ca3af"
                   keyboardType="numeric"
                   maxLength={19}
                   value={cardNumber}
-                  onChangeText={setCardNumber}
+                  onChangeText={handleCardNumberChange}
                 />
               </View>
-              
+
               <View style={styles.row}>
-                <View style={[styles.inputGroup, { flex: 1, marginRight: 10 }]}>
-                  <Text style={styles.inputLabel}>Expiry</Text>
+                <View style={[styles.physicalCardInputGroup, { flex: 1, marginRight: 15 }]}>
+                  <Text style={styles.physicalCardLabel}>EXPIRY</Text>
                   <TextInput
-                    style={styles.textInput}
+                    style={styles.physicalCardTextInput}
                     placeholder="MM/YY"
+                    placeholderTextColor="#9ca3af"
+                    keyboardType="numeric"
                     maxLength={5}
                     value={expiry}
-                    onChangeText={setExpiry}
+                    onChangeText={handleExpiryChange}
                   />
                 </View>
-                <View style={[styles.inputGroup, { flex: 1 }]}>
-                  <Text style={styles.inputLabel}>CVV</Text>
+                <View style={[styles.physicalCardInputGroup, { flex: 1 }]}>
+                  <Text style={styles.physicalCardLabel}>CVV</Text>
                   <TextInput
-                    style={styles.textInput}
-                    placeholder="123"
+                    style={styles.physicalCardTextInput}
+                    placeholder=""
                     keyboardType="numeric"
                     maxLength={3}
                     secureTextEntry
                     value={cvv}
-                    onChangeText={setCvv}
+                    onChangeText={handleCvvChange}
                   />
                 </View>
               </View>
@@ -428,19 +458,57 @@ const styles = StyleSheet.create({
     color: '#db2777',
     fontWeight: 'bold',
   },
-  cardDetailsContainer: {
-    backgroundColor: '#f9fafb',
-    padding: 15,
-    borderRadius: 12,
+  physicalCardContainer: {
+    backgroundColor: '#1f2937', // Dark charcoal to look like a premium card
+    padding: 24,
+    borderRadius: 16,
     marginBottom: 20,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#374151',
   },
-  cardSectionTitle: {
-    fontSize: 14,
+  physicalCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  chipIcon: {
+    width: 40,
+    height: 30,
+    backgroundColor: '#d4d4d8', // Metallic grey/silver
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#a1a1aa',
+  },
+  cardBrand: {
+    color: '#e5e7eb',
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#374151',
-    marginBottom: 15,
+    fontStyle: 'italic',
+  },
+  physicalCardInputGroup: {
+    marginBottom: 16,
+  },
+  physicalCardLabel: {
+    fontSize: 10,
+    color: '#9ca3af', // Light grey label
+    marginBottom: 4,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  physicalCardTextInput: {
+    fontSize: 22,
+    color: '#ffffff',
+    letterSpacing: 2, // Space out the numbers nicely
+    borderBottomWidth: 1,
+    borderBottomColor: '#4b5563', // Subtle underline
+    paddingVertical: 4,
+    fontFamily: 'monospace', // Monospace font looks more like a card
   },
   payButton: {
     backgroundColor: '#3b0764',

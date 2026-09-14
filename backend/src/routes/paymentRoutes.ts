@@ -28,6 +28,18 @@ router.post('/create-order', protect, async (req: AuthRequest, res: Response): P
     };
 
     const order = await razorpay.orders.create(options);
+    
+    // Create PENDING transaction for the wallet deposit
+    await Transaction.create({
+      receiverId: req.user._id,
+      title: 'Wallet Deposit',
+      amount: Number(amount) / 100, // Assuming Razorpay amount is in paise, we store in INR
+      type: 'DEPOSIT',
+      status: 'PENDING',
+      category: 'Wallet',
+      reference: order.id
+    });
+
     res.json({
       ...order,
       key_id: process.env.RAZORPAY_KEY_ID || '', // Frontend needs this to open the checkout modal
@@ -55,21 +67,19 @@ router.post('/verify-payment', protect, async (req: AuthRequest, res: Response):
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-      // 1. Add amount to user's wallet
-      const wallet = await Wallet.findOne({ user: req.user._id });
-      if (wallet) {
-        wallet.balance += Number(amount);
-        await wallet.save();
-      }
+      // 1. Update the PENDING transaction to SUCCESS
+      const transaction = await Transaction.findOne({ reference: razorpay_order_id });
+      if (transaction && transaction.status === 'PENDING') {
+        transaction.status = 'SUCCESS';
+        await transaction.save();
 
-      // 2. Create transaction record
-      await Transaction.create({
-        user: req.user._id,
-        title: 'Added to Wallet',
-        amount: Number(amount),
-        type: 'received',
-        category: 'Wallet'
-      });
+        // 2. Add amount to user's wallet ONLY if transaction was pending (prevents double crediting)
+        const wallet = await Wallet.findOne({ user: req.user._id });
+        if (wallet) {
+          wallet.balance += transaction.amount; // Use the trusted amount from the DB!
+          await wallet.save();
+        }
+      }
 
       res.json({ message: 'Payment verified successfully' });
     } else {

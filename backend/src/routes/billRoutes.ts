@@ -81,11 +81,12 @@ router.post('/pay', protect, fraudDetection, async (req: AuthRequest, res: Respo
     const aiCategory = await categorizeTransaction(`${service} Bill Payment`);
 
     const transaction = await Transaction.create({
-      user: req.user._id,
+      senderId: req.user._id,
       title: `${service} Payment via ${paymentMethod.toUpperCase()}`,
       amount: amount,
       category: aiCategory,
-      type: 'sent'
+      type: 'BILL_PAYMENT',
+      status: 'SUCCESS'
     });
 
     res.json({

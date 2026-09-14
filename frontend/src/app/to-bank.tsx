@@ -60,12 +60,13 @@ export default function ToBank() {
     try {
       // Make a POST request to our backend API to process the transfer
       // The await keyword pauses execution until the API responds
-      const response = await apiFetch('/transactions/transfer', {
+      const response = await apiFetch('/transactions/withdraw', {
         method: 'POST',
         body: JSON.stringify({
-          receiverId: receiverName, // We are using receiverName as the receiverId here
+          accountNumber,
+          ifscCode,
+          receiverName,
           amount: numericAmount, // The validated amount
-          paymentMethod: 'wallet', // Transferring out from wallet
         })
       });
       

@@ -32,14 +32,39 @@ router.post('/advisor', protect, async (req: any, res: Response): Promise<void |
 
     // 1. Fetch the user's financial context from MongoDB
     const wallet = await Wallet.findOne({ user: req.user._id });
-    const recentTransactions = await Transaction.find({ user: req.user._id })
-      .sort({ createdAt: -1 })
-      .limit(5); // Just grab the last 5 for context
-
     const balance = wallet ? wallet.balance : 0;
 
+    // Fetch transactions from the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentTransactions = await Transaction.find({ 
+      $or: [{ senderId: req.user._id }, { receiverId: req.user._id }],
+      createdAt: { $gte: thirtyDaysAgo },
+      status: 'SUCCESS'
+    }).sort({ createdAt: -1 });
+
+    // Aggregate spending
+    let totalSpent = 0;
+    const spendingByCategory: Record<string, number> = {};
+    
+    recentTransactions.forEach(t => {
+      // If user is sender, it's an expense
+      if (t.senderId?.toString() === req.user._id.toString()) {
+        totalSpent += t.amount;
+        spendingByCategory[t.category] = (spendingByCategory[t.category] || 0) + t.amount;
+      }
+    });
+
+    const context = {
+      balance,
+      totalSpentThisMonth: totalSpent,
+      spendingByCategory,
+      topRecent: recentTransactions.slice(0, 5)
+    };
+
     // 2. Pass context to the AI Service
-    const advice = await getFinancialAdvice(question, balance, recentTransactions);
+    const advice = await getFinancialAdvice(question, context);
 
     res.json({ advice });
   } catch (error: any) {

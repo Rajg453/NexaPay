@@ -1,7 +1,7 @@
 // Import React and hooks for managing state and lifecycle
 import React, { useEffect, useState } from 'react';
 // Import UI components from React Native
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, StatusBar, FlatList, Modal, TouchableWithoutFeedback } from 'react-native';
 // Import AsyncStorage for saving data (like login tokens) locally on the phone
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import our custom API fetching tool to talk to the backend
@@ -16,6 +16,7 @@ export default function Dashboard() {
   // We create a state variable called 'balance' to store the user's money, starting at 0
   const [balance, setBalance] = useState(0);
   const [rewardPoints, setRewardPoints] = useState(0); // State for Rewards!
+  const [sidebarVisible, setSidebarVisible] = useState(false); // State for Sidebar Modal
   // 'router' allows us to move to different screens (like '/login' or '/history')
   const router = useRouter();
 
@@ -71,7 +72,10 @@ export default function Dashboard() {
       <View style={styles.header}>
         {/* Left side: Profile Icon and Greeting */}
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.profileIconPlaceholder}>
+          <TouchableOpacity 
+            style={styles.profileIconPlaceholder}
+            onPress={() => setSidebarVisible(true)}
+          >
             <Text style={styles.profileInitial}>U</Text>
           </TouchableOpacity>
           <View>
@@ -79,13 +83,22 @@ export default function Dashboard() {
             <Text style={styles.upiIdText}>user@nexapay</Text>
           </View>
         </View>
-        {/* Right side: Notification Bell and Help Icon */}
+        {/* Right side: Notification Bell, Help, and Logout */}
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.iconButton}>
             <Text style={styles.headerIcon}>🔔</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}>
             <Text style={styles.headerIcon}>❓</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={async () => {
+              await AsyncStorage.removeItem('token');
+              router.replace('/login');
+            }}
+          >
+            <MaterialIcons name="logout" size={24} color="#ec4899" />
           </TouchableOpacity>
         </View>
       </View>
@@ -204,6 +217,45 @@ export default function Dashboard() {
         </View>
 
       </ScrollView>
+
+      {/* SIDEBAR MODAL */}
+      <Modal
+        visible={sidebarVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSidebarVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setSidebarVisible(false)}>
+          <View style={styles.sidebarOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.sidebarContent}>
+                <View style={styles.sidebarHeader}>
+                  <View style={styles.profileIconPlaceholder}>
+                    <Text style={styles.profileInitial}>U</Text>
+                  </View>
+                  <Text style={styles.sidebarName}>User</Text>
+                  <Text style={styles.sidebarUpi}>user@nexapay</Text>
+                </View>
+                
+                <TouchableOpacity 
+                  style={styles.sidebarItem}
+                  onPress={() => {
+                    setSidebarVisible(false);
+                    router.push('/analytics');
+                  }}
+                >
+                  <MaterialIcons name="pie-chart" size={24} color="#ec4899" />
+                  <Text style={styles.sidebarItemText}>Dashboard</Text>
+                </TouchableOpacity>
+
+                {/* Add more sidebar items here in the future if needed */}
+
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
     </SafeAreaView>
   );
 }
@@ -414,5 +466,51 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
     lineHeight: 16,
+  },
+  sidebarOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  sidebarContent: {
+    width: '75%',
+    maxWidth: 300,
+    backgroundColor: '#ffffff',
+    height: '100%',
+    paddingTop: 50,
+    shadowColor: '#000',
+    shadowOffset: { width: 5, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  sidebarHeader: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3e8ff',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  sidebarName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#3b0764',
+    marginTop: 10,
+  },
+  sidebarUpi: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 5,
+  },
+  sidebarItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    paddingLeft: 20,
+  },
+  sidebarItemText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3b0764',
+    marginLeft: 15,
   },
 });

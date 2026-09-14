@@ -68,4 +68,18 @@ router.post('/login', async (req: Request, res: Response): Promise<void | Respon
   }
 });
 
+// @desc    Get user basic details for QR code verification
+// @route   GET /api/auth/user/:id
+router.get('/user/:id', async (req: Request, res: Response): Promise<void | Response> => {
+  try {
+    const user = await User.findById(req.params.id).select('name');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json({ _id: user._id, name: user.name });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Invalid User ID or server error' });
+  }
+});
+
 export default router;

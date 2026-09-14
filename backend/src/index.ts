@@ -15,6 +15,7 @@ import walletRoutes from './routes/walletRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import billRoutes from './routes/billRoutes';
 import bankRoutes from './routes/bankRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 
 const app: Express = express();
 const PORT = process.env.PORT || 3000; // Use port from .env or default to 3000
@@ -32,6 +33,7 @@ app.use('/api/wallet', walletRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/bills', billRoutes);
 app.use('/api/banks', bankRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Finally, tell the server to actually start listening for requests
 app.listen(PORT, () => {

@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ScanAndPay } from './ScanAndPay';
+import { ReceiveMoneyQR } from './ReceiveMoneyQR';
 
 export const ActionButtons = () => {
   const [paymentStatus, setPaymentStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+  const [showQR, setShowQR] = useState(false);
 
   const navigate = useNavigate();
 
@@ -111,11 +115,14 @@ export const ActionButtons = () => {
       <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', color: 'var(--text-main)' }}>Money Transfers</h3>
       
       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-        <ActionIcon icon="📷" label="Scan & Pay" onClick={() => navigate('/scan')} />
+        <ActionIcon icon="📷" label="Scan & Pay" onClick={() => setShowScanner(true)} />
         <ActionIcon icon="📱" label="To Mobile" onClick={handlePayment} />
-        <ActionIcon icon="🏦" label="To Bank/UPI" />
-        <ActionIcon icon="👤" label="To Self" />
+        <ActionIcon icon="💳" label="Receive QR" onClick={() => setShowQR(true)} />
+        <ActionIcon icon="🏦" label="To Bank" />
       </div>
+
+      {showScanner && <ScanAndPay onClose={() => setShowScanner(false)} />}
+      {showQR && <ReceiveMoneyQR onClose={() => setShowQR(false)} />}
 
       {paymentStatus && (
         <div style={{ 
