@@ -35,7 +35,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void | Res
     await Wallet.create({ user: user._id as any });
 
     // Generate secure JWT tokens
-    const { accessToken, refreshToken } = generateTokens(user._id as string);
+    const { accessToken, refreshToken } = generateTokens(user._id.toString());
 
     // Set refresh token in httpOnly cookie
     res.cookie('refreshToken', refreshToken, {
@@ -67,7 +67,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void | Respon
     // Check if user exists and password matches
     if (user && (await user.matchPassword(password))) {
       // Generate secure JWT tokens
-      const { accessToken, refreshToken } = generateTokens(user._id as string);
+      const { accessToken, refreshToken } = generateTokens(user._id.toString());
 
       // Set refresh token in httpOnly cookie
       res.cookie('refreshToken', refreshToken, {
@@ -121,7 +121,7 @@ router.post('/refresh', async (req: Request, res: Response): Promise<void | Resp
     }
 
     // Generate new tokens
-    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user._id as string);
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user._id.toString());
 
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
