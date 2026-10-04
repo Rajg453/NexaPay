@@ -16,7 +16,8 @@ export const ActionButtons = () => {
       setIsLoading(true);
       setPaymentStatus('Initiating payment...');
       
-      const orderRes = await fetch('http://localhost:3000/api/payments/create-order', {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const orderRes = await fetch(`${baseUrl}/payments/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: 50000, currency: 'INR' }), 
@@ -38,7 +39,7 @@ export const ActionButtons = () => {
         order_id: order.id,
         handler: async function (response: any) {
           setPaymentStatus('Verifying payment...');
-          const verifyRes = await fetch('http://localhost:3000/api/payments/verify-payment', {
+          const verifyRes = await fetch(`${baseUrl}/payments/verify-payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

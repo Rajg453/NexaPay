@@ -10,67 +10,46 @@ import { apiFetch } from '../services/api';
 import { useRouter } from 'expo-router';
 // Import vector icons for professional UI
 import { MaterialIcons } from '@expo/vector-icons';
+// Import the Floating AI Assistant
+import { NexaAI } from '../components/NexaAI';
 
 // This is the main Dashboard component, the first screen the user sees after logging in
 export default function Dashboard() {
-  // We create a state variable called 'balance' to store the user's money, starting at 0
   const [balance, setBalance] = useState(0);
-  const [rewardPoints, setRewardPoints] = useState(0); // State for Rewards!
-  const [sidebarVisible, setSidebarVisible] = useState(false); // State for Sidebar Modal
-  // 'router' allows us to move to different screens (like '/login' or '/history')
+  const [rewardPoints, setRewardPoints] = useState(0);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const router = useRouter();
 
-  // useEffect runs this code once when the screen first loads
   useEffect(() => {
-    // We create an async function to fetch the wallet balance from our server
     const fetchBalance = async () => {
       try {
-        // We look inside the phone's storage to see if the user has a saved login token
         const token = await AsyncStorage.getItem('token');
-        
-        // If there's no token, the user is not logged in!
         if (!token) {
-          // So we send them directly to the login screen
           router.replace('/login');
-          // And we stop the function here so it doesn't try to fetch data
           return; 
         }
 
-        // We ask our backend server for the current wallet balance using our API
         const data = await apiFetch('/wallet/balance');
-        // We update our state with the numbers the server sent back
         setBalance(data.balance || 0);
         setRewardPoints(data.rewardPoints || 0);
       } catch (err: any) {
-        // If the server throws an error, we catch it here
-        // We check if the error is because the token is old or invalid
         if (err.message.includes('Not authorized') || err.message.includes('token')) {
-          // If so, we delete the bad token from the phone
           await AsyncStorage.removeItem('token');
-          // And force the user to log in again
           router.replace('/login');
         } else {
-          // If it's a different error, we just print it to the console for debugging
           console.error(err);
         }
       }
     };
-    // Now we actually call the function we just created above
     fetchBalance(); 
-  }, []); // The empty brackets [] mean this only runs ONCE when the screen opens
+  }, []);
 
-
-
-  // This is what the screen will actually draw on the phone
   return (
-    // SafeAreaView ensures our app doesn't go under the notch or status bar on modern phones
     <SafeAreaView style={styles.safeArea}>
-      {/* StatusBar controls the color and text of the time/battery bar at the very top */}
-      <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
+      <StatusBar backgroundColor="#fdf2f8" barStyle="dark-content" />
       
-      {/* HEADER SECTION: Clean white header with Profile and Notifications */}
+      {/* HEADER SECTION */}
       <View style={styles.header}>
-        {/* Left side: Profile Icon and Greeting */}
         <View style={styles.headerLeft}>
           <TouchableOpacity 
             style={styles.profileIconPlaceholder}
@@ -83,7 +62,6 @@ export default function Dashboard() {
             <Text style={styles.upiIdText}>user@nexapay</Text>
           </View>
         </View>
-        {/* Right side: Notification Bell, Help, and Logout */}
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.iconButton}>
             <Text style={styles.headerIcon}>🔔</Text>
@@ -103,120 +81,171 @@ export default function Dashboard() {
         </View>
       </View>
 
-      {/* ScrollView allows the user to scroll up and down if the content is too long */}
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 30 }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
         
-        {/* PRIMARY ACTION: The big 'Scan Any QR' button, prominent like GPay */}
-        <View style={styles.scanContainer}>
-          <TouchableOpacity style={styles.scanButton} onPress={() => router.push('/scan')}>
-            <Text style={styles.scanIcon}>📷</Text>
-            <Text style={styles.scanText}>Scan Any QR</Text>
-          </TouchableOpacity>
-        </View>
-
-
-
-        {/* WALLET & TOPUP SECTION: Shows balance and connects to Razorpay */}
-        <View style={styles.card}>
-          <View style={styles.walletHeader}>
-            <Text style={styles.walletTitle}>NexaPay Wallet</Text>
-            <TouchableOpacity onPress={() => router.push('/history')}>
-               <Text style={styles.historyLink}>History ›</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.walletFlex}>
-             <View>
-                <Text style={styles.walletBalance}>₹{balance.toFixed(2)}</Text>
-                {/* REWARDS BADGE */}
-                <View style={styles.rewardsBadge}>
-                   <Text style={styles.rewardsIcon}>🎁</Text>
-                   <Text style={styles.rewardsText}>{rewardPoints} Rewards</Text>
-                </View>
-             </View>
-             {/* This button will trigger Razorpay to add money */}
-             <TouchableOpacity style={styles.topupButton} onPress={() => router.push('/add-money')}>
-                <Text style={styles.topupButtonText}>+ Add Money</Text>
-             </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* RECHARGE & PAY BILLS SECTION: A grid of utilities (BBPS Integration future) */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Recharge & Pay Bills</Text>
-          <View style={styles.gridContainer}>
-            {/* Mobile Recharge Button */}
-            <TouchableOpacity style={styles.gridItem} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Mobile Recharge' } })}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.gridIconText}>📱</Text>
-              </View>
-              <Text style={styles.gridText}>Mobile{'\n'}Recharge</Text>
-            </TouchableOpacity>
-
-            {/* DTH (TV) Recharge Button */}
-            <TouchableOpacity style={styles.gridItem} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'DTH' } })}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.gridIconText}>📺</Text>
-              </View>
-              <Text style={styles.gridText}>DTH</Text>
-            </TouchableOpacity>
-
-            {/* Electricity Bill Button */}
-            <TouchableOpacity style={styles.gridItem} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Electricity' } })}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.gridIconText}>💡</Text>
-              </View>
-              <Text style={styles.gridText}>Electricity</Text>
-            </TouchableOpacity>
-
-            {/* Gas Cylinder Button */}
-            <TouchableOpacity style={styles.gridItem} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Gas Cylinder' } })}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.gridIconText}>⛽</Text>
-              </View>
-              <Text style={styles.gridText}>Book a{'\n'}Cylinder</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* OTHER PAYMENTS SECTION: Sending to Bank, Self, etc. */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Transfer Money</Text>
-          <View style={styles.gridContainer}>
-            {/* To Bank Account */}
-            <TouchableOpacity style={styles.gridItem} onPress={() => router.push('/to-bank')}>
-              <View style={styles.iconCircleTransfer}>
-                <MaterialIcons name="account-balance" size={26} color="#ffffff" />
-              </View>
-              <Text style={styles.gridText}>To Bank{'\n'}Account</Text>
-            </TouchableOpacity>
-
-            {/* To Self Account */}
-            <TouchableOpacity style={styles.gridItem} onPress={() => router.push('/to-self')}>
-              <View style={styles.iconCircleTransfer}>
-                <MaterialIcons name="autorenew" size={26} color="#ffffff" />
-              </View>
-              <Text style={styles.gridText}>To Self{'\n'}Account</Text>
-            </TouchableOpacity>
-
-            {/* Check Bank Balance */}
-            <TouchableOpacity style={styles.gridItem} onPress={() => router.push('/check-balance')}>
-              <View style={styles.iconCircleTransfer}>
-                <MaterialIcons name="account-balance-wallet" size={26} color="#ffffff" />
-              </View>
-              <Text style={styles.gridText}>Check{'\n'}Balance</Text>
-            </TouchableOpacity>
+        {/* WALLET CARD - Mirrors the Web WalletCard */}
+        <View style={styles.glassCard}>
+          <View style={styles.flexRow}>
+            <View style={styles.flexCol}>
+              <Text style={styles.textMuted}>Available Balance</Text>
+              <Text style={styles.walletBalance}>₹{balance.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Text>
+            </View>
             
-            {/* Pay Contacts / Phone */}
+            <TouchableOpacity style={styles.btnPrimary} onPress={() => router.push('/add-money')}>
+              <Text style={styles.btnPrimaryText}>+ Add Money</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.divider} />
+          
+          <View style={styles.flexRow}>
+            <Text style={styles.textMutedSmall}>
+              Reward Points: <Text style={styles.pointsText}>{rewardPoints}</Text>
+            </Text>
+            <TouchableOpacity onPress={() => router.push('/history')}>
+              <Text style={styles.viewRewardsText}>View Rewards ➔</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* ACTION BUTTONS (Scan, Bank, Mobile, Receive) */}
+        <View style={styles.glassCard}>
+          <Text style={styles.sectionTitle}>Money Transfers</Text>
+          <View style={styles.gridContainer}>
+            <TouchableOpacity style={styles.gridItem} onPress={() => router.push('/scan')}>
+              <View style={styles.iconCircleTransfer}>
+                 <MaterialIcons name="qr-code-scanner" size={28} color="#ffffff" />
+              </View>
+              <Text style={styles.gridText}>Scan & Pay</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity style={styles.gridItem} onPress={() => router.push('/pay-phone')}>
               <View style={styles.iconCircleTransfer}>
-                <MaterialIcons name="contact-phone" size={26} color="#ffffff" />
+                 <MaterialIcons name="phone-android" size={28} color="#ffffff" />
               </View>
-              <Text style={styles.gridText}>Pay{'\n'}Contacts</Text>
+              <Text style={styles.gridText}>To Mobile</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity style={styles.gridItem} onPress={() => router.push('/check-balance')}>
+              <View style={styles.iconCircleTransfer}>
+                 <MaterialIcons name="credit-card" size={28} color="#ffffff" />
+              </View>
+              <Text style={styles.gridText}>Receive QR</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.gridItem} onPress={() => router.push('/to-bank')}>
+              <View style={styles.iconCircleTransfer}>
+                 <MaterialIcons name="account-balance" size={28} color="#ffffff" />
+              </View>
+              <Text style={styles.gridText}>To Bank</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* SERVICES - RECHARGE & PAY BILLS */}
+        <View style={styles.glassCard}>
+          <Text style={styles.sectionTitle}>Recharge & Pay Bills</Text>
+          <View style={styles.gridContainerThreeCol}>
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Mobile' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>📱</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>Mobile</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'DTH' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>📺</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>DTH</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Electricity' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>💡</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>Electricity</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Credit Card' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>💳</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>Credit Card</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Rent' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>🏠</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>Rent</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Water' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>💧</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>Water</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Gas' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>⛽</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>Gas</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.gridItemThreeCol} onPress={() => router.push({ pathname: '/pay-bill', params: { service: 'Education' } })}>
+              <View style={styles.iconCirclePink}>
+                <Text style={styles.gridIconText}>🎓</Text>
+              </View>
+              <Text style={styles.gridTextPurple}>Education</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* RECENT TRANSACTIONS */}
+        <View style={styles.glassCard}>
+          <View style={styles.flexRow}>
+            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <TouchableOpacity onPress={() => router.push('/history')}>
+              <Text style={styles.viewRewardsText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ paddingVertical: 30, alignItems: 'center' }}>
+            <Text style={{ color: '#6b21a8', fontSize: 16 }}>No recent transactions</Text>
           </View>
         </View>
 
       </ScrollView>
+
+      {/* BOTTOM NAVIGATION */}
+      <View style={styles.bottomNav}>
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🏠</Text>
+          <Text style={styles.navTextActive}>Home</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🛒</Text>
+          <Text style={styles.navText}>Stores</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>🛡️</Text>
+          <Text style={styles.navText}>Insurance</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.navItem}>
+          <Text style={styles.navIcon}>📈</Text>
+          <Text style={styles.navText}>Wealth</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/history')}>
+          <Text style={styles.navIcon}>📜</Text>
+          <Text style={styles.navText}>History</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* SIDEBAR MODAL */}
       <Modal
@@ -247,38 +276,45 @@ export default function Dashboard() {
                   <MaterialIcons name="pie-chart" size={24} color="#ec4899" />
                   <Text style={styles.sidebarItemText}>Dashboard</Text>
                 </TouchableOpacity>
-
-                {/* Add more sidebar items here in the future if needed */}
-
               </View>
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </Modal>
 
+      {/* Floating AI Assistant */}
+      <NexaAI />
     </SafeAreaView>
   );
 }
 
-// STYLING: This is where we make things look pretty, like CSS for the web
+// STYLING: Matching the Vercel App Theme
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#ffffff', // White background
+    backgroundColor: '#fdf2f8', // var(--bg-dark)
   },
   container: {
     flex: 1,
-    backgroundColor: '#ffffff', // Unified white background
+    backgroundColor: '#fdf2f8',
+    width: '100%',
+    maxWidth: 600, // Make it look like a mobile app even on desktop browsers
+    alignSelf: 'center', // Center it on large screens
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
   },
   header: {
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
+    backgroundColor: '#fdf2f8',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3e8ff', // Light purple
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
   },
   headerLeft: {
     flexDirection: 'row',
@@ -288,141 +324,107 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#f3e8ff', // Light purple
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#fbcfe8',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
   profileInitial: {
-    color: '#3b0764', // Dark Purple
+    color: '#3b0764', // var(--text-main)
     fontSize: 20,
     fontWeight: 'bold',
   },
   greetingText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#3b0764', // Dark Purple
+    color: '#3b0764', 
   },
   upiIdText: {
     fontSize: 12,
-    color: '#6b21a8', // Medium Purple
+    color: '#6b21a8', // var(--text-muted)
     marginTop: 2,
   },
   headerRight: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   iconButton: {
     marginLeft: 15,
   },
   headerIcon: {
-    fontSize: 22,
-  },
-  scanContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  scanButton: {
-    backgroundColor: '#3b0764', // Dark Purple for main action
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 30,
-    borderRadius: 30,
-    elevation: 4,
-    shadowColor: '#3b0764',
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 3 },
-  },
-  scanIcon: {
     fontSize: 20,
-    marginRight: 8,
   },
-  scanText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    marginHorizontal: 15,
-    marginBottom: 15,
-    borderRadius: 16,
-    padding: 20,
-    elevation: 3,
-    shadowColor: '#ec4899', // Pink subtle shadow
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+  
+  /* GLASS CARD STYLES */
+  glassCard: {
+    backgroundColor: '#ffffff', // var(--card-bg)
+    borderRadius: 12,
+    padding: 24,
     borderWidth: 1,
-    borderColor: '#f3e8ff',
+    borderColor: '#fbcfe8', // var(--border)
+    marginBottom: 16,
+    shadowColor: '#ec4899',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#3b0764', // Dark Purple
-    marginBottom: 20,
-  },
-  walletHeader: {
+  flexRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
   },
-  walletTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#3b0764', // Dark purple
+  flexCol: {
+    flexDirection: 'column',
   },
-  historyLink: {
-    color: '#ec4899', // Pink link
+  textMuted: {
+    color: '#6b21a8',
     fontSize: 14,
-    fontWeight: 'bold',
-  },
-  walletFlex: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginBottom: 4,
   },
   walletBalance: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#3b0764',
   },
-  rewardsBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fdf2f8', // Very light pink
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 4,
-    alignSelf: 'flex-start', // Don't stretch across screen
+  btnPrimary: {
+    backgroundColor: '#ec4899', // var(--primary)
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
   },
-  rewardsIcon: {
-    fontSize: 12,
-    marginRight: 4,
-  },
-  rewardsText: {
-    color: '#db2777', // Darker pink for text
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  topupButton: {
-    backgroundColor: '#ec4899', // Vibrant pink button
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
-    shadowColor: '#ec4899',
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  topupButtonText: {
+  btnPrimaryText: {
     color: '#ffffff',
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#fbcfe8',
+    marginVertical: 20,
+  },
+  textMutedSmall: {
+    color: '#6b21a8',
     fontSize: 14,
+  },
+  pointsText: {
+    color: '#f59e0b',
+    fontWeight: 'bold',
+  },
+  viewRewardsText: {
+    color: '#ec4899',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  
+  /* SECTIONS */
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3b0764',
+    marginBottom: 16,
   },
   gridContainer: {
     flexDirection: 'row',
@@ -432,41 +434,72 @@ const styles = StyleSheet.create({
   gridItem: {
     width: '22%',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 16,
+  },
+  gridContainerThreeCol: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    gap: 16, // Use gap for easy spacing
+  },
+  gridItemThreeCol: {
+    width: '30%',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   iconCircle: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#faf5ff', // Light purple
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#fbcfe8',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
+  },
+  iconCirclePink: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#fdf2f8', // Very light pink background from screenshot
+    borderWidth: 1,
+    borderColor: '#fbcfe8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   iconCircleTransfer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#6b21a8', // Strong purple like PhonePe/GPay
+    width: 54,
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: '#ec4899', // primary vibrant pink
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
-    elevation: 3,
-    shadowColor: '#6b21a8',
+    marginBottom: 8,
+    elevation: 4,
+    shadowColor: '#ec4899',
     shadowOpacity: 0.3,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
   },
   gridIconText: {
     fontSize: 22,
   },
   gridText: {
-    fontSize: 11,
-    color: '#6b21a8', // Medium purple text
+    fontSize: 12,
+    color: '#3b0764',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  gridTextPurple: {
+    fontSize: 13,
+    color: '#6b21a8', // Matching the lighter purple in screenshot
     textAlign: 'center',
     fontWeight: '500',
-    lineHeight: 16,
   },
+
+  /* SIDEBAR */
   sidebarOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -486,7 +519,7 @@ const styles = StyleSheet.create({
   sidebarHeader: {
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3e8ff',
+    borderBottomColor: '#fbcfe8',
     alignItems: 'center',
     marginBottom: 10,
   },
@@ -513,4 +546,37 @@ const styles = StyleSheet.create({
     color: '#3b0764',
     marginLeft: 15,
   },
+  
+  /* BOTTOM NAVIGATION */
+  bottomNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#fbcfe8',
+    width: '100%',
+    maxWidth: 600,
+    alignSelf: 'center',
+  },
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navIcon: {
+    fontSize: 24,
+    marginBottom: 4,
+  },
+  navText: {
+    fontSize: 12,
+    color: '#6b21a8', // Purple
+    fontWeight: '500',
+  },
+  navTextActive: {
+    fontSize: 12,
+    color: '#ec4899', // Pink
+    fontWeight: 'bold',
+  }
 });
+
